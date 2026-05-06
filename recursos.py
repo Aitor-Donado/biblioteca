@@ -13,7 +13,7 @@ def registrar_accion(func):
         # 2. Si no se lanzó ninguna excepción, registra la acción
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open("biblioteca_log.txt", "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {func.__name__} ejecutado sobre '{self.titulo}'\n")
+            f.write(f"[{timestamp}] {func.__name__} ejecutado sobre '{self.titulo}' a {self.prestado_a.nombre if not self.disponible else ""}\n")
             
         return resultado
     return wrapper
@@ -35,7 +35,8 @@ class Recurso:
         if self.disponible:
             self.disponible = False
             self.prestado_a = usuario
-            print(f"Se ha prestado el libro a {usuario}")
+            usuario.recursos_prestados.append(self.titulo)
+            print(f"Se ha prestado el libro a {usuario.nombre}")
         else:
             raise PermissionError("El libro no está disponible")
 
@@ -56,14 +57,20 @@ class Recurso:
 # BLOQUE DE PRUEBAS
 # ==========================================
 if __name__ == "__main__":
+
     r = Recurso("El Hobbit", "Fantasía")
     print(r)          # → "El Hobbit (Fantasía) - disponible"
     assert r.__str__() == "El Hobbit (Fantasía) - disponible", "No imprime bien los datos del libro"
     
-    r.prestar("Ana García")
+    from usuarios import Usuario
+    u1 = Usuario("Ana García", "ana@gmail.com")
+    u2 = Usuario("Carlos López", "carlos@hotmail.com")
+    
+    r.prestar(u1)
     print(r)          # → "El Hobbit (Fantasía) - no disponible"
     assert r.disponible == False, "El libro no debería estar disponible"
-    
+    u1.mostrar_prestamos()
+    assert u1.recursos_prestados[-1]==r.titulo, "El último préstamo no coincide"
     try:
         r.prestar("Carlos López") # → Debe rechazar la operación y avisar
     except PermissionError as e:
