@@ -29,6 +29,7 @@ class Recurso:
         self.disponible = True
         self.prestado_a = None
         self.duracion_prestamo = 3
+        self.id = id(self)
 
     @registrar_accion
     def prestar(self, usuario):
@@ -53,12 +54,35 @@ class Recurso:
         return f'{self.titulo} ({self.genero}) - {"no " if not self.disponible else ""}disponible'
 
 
+class Libro(Recurso):
+    def __init__(self, titulo, genero, autor, paginas):
+        super().__init__(titulo, genero)
+        self.autor = autor
+        self.paginas = paginas
+        self.duracion_prestamo = 7
+
+class DVD(Recurso):
+    def __init__(self, titulo, genero, director, duracion):
+        super().__init__(titulo, genero)
+        self.director = director
+        self.duracion = duracion
+        self.duracion_prestamo = 5
+
+    def crear_recurso(cls):
+        pass
+
+class Revista(Recurso):
+    def __init__(self, titulo, genero, numero, editorial):
+        super().__init__(titulo, genero)
+        self.numero = numero
+        self.editorial = editorial
+
 # ==========================================
 # BLOQUE DE PRUEBAS
 # ==========================================
 if __name__ == "__main__":
 
-    r = Recurso("El Hobbit", "Fantasía")
+    r = Libro("El Hobbit", "Fantasía", "Tolkien", 1000)
     print(r)          # → "El Hobbit (Fantasía) - disponible"
     assert r.__str__() == "El Hobbit (Fantasía) - disponible", "No imprime bien los datos del libro"
     

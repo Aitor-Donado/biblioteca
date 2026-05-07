@@ -47,15 +47,23 @@ class Biblioteca:
 
     def crear_usuario(self):
         nombre = input("Introduce el nombre del usuario: ")
-        email = Biblioteca.comprueba_email(input("Introduce el email del usuario"))
-        usuario_nuevo = Usuario(nombre, email)
+        while True:
+            try:
+                email_input = input("Introduce el email del usuario: ").strip()
+                email_valido = Biblioteca.comprueba_email(email_input)
+                break
+            except ValueError as e:
+                print(f"❌ {e}. Inténtalo de nuevo.")
+        usuario_nuevo = Usuario(nombre, email_valido)
         self.usuarios.append(usuario_nuevo)
 
     def crear_recurso(self):
         print("1: Libro\n2: DVD\n3:Revista")
         tipo = input("¿Que tipo de recurso quieres agregar?: ")
         print(tipo)
-        
-biblio = Biblioteca()
-biblio.crear_usuario()
-print(biblio.usuarios)
+
+
+if __name__ == "__main__":      
+    biblio = Biblioteca()
+    biblio.crear_usuario()
+    print(biblio.usuarios)
