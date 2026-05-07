@@ -90,10 +90,12 @@ class Biblioteca:
 
 if __name__ == "__main__":  
     # Prueba de creación de recursos y usuarios
-    """
     biblio = Biblioteca()
+    """
     biblio.crear_usuario()
     print(biblio.usuarios)
     biblio.crear_recurso()
+    """
+    biblio.recursos.append(Revista("¡Hola!", "cotilleos", 300, "Bruguera"))
     print(biblio.recursos)
-    """    
+    biblio.prestamo("¡Hola!", "Pedro")
