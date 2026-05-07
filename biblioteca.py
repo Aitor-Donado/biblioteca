@@ -1,7 +1,8 @@
-from recursos import Recurso
+from recursos import Libro, Revista, DVD
 from usuarios import Usuario
 from datetime import datetime
 import re
+
 # ==========================================
 # DECORADOR DE REGISTRO (Fase 4.3)
 # ==========================================
@@ -57,13 +58,42 @@ class Biblioteca:
         usuario_nuevo = Usuario(nombre, email_valido)
         self.usuarios.append(usuario_nuevo)
 
+
     def crear_recurso(self):
-        print("1: Libro\n2: DVD\n3:Revista")
-        tipo = input("¿Que tipo de recurso quieres agregar?: ")
-        print(tipo)
+        print("\n--- Crear nuevo recurso ---")
+        print("1: Libro | 2: DVD | 3: Revista")
+        opcion = input("Selecciona tipo: ")
+
+        titulo = input("Título: ")
+        genero = input("Género: ")
+
+        # Lógica específica por tipo
+        if opcion == "1":
+            autor = input("Autor: ")
+            paginas = int(input("Páginas: "))
+            nuevo = Libro(titulo, genero, autor, paginas)
+        elif opcion == "2":
+            director = input("Director: ")
+            duracion = input("Duración (min): ")
+            nuevo = DVD(titulo, genero, director, duracion)
+        elif opcion == "3":
+            numero = input("Número: ")
+            editorial = input("Editorial: ")
+            nuevo = Revista(titulo, genero, numero, editorial)
+        else:
+            print("❌ Opción no válida.")
+            return
+
+        self.recursos.append(nuevo)
+        print(f"✅ Recurso '{titulo}' añadido correctamente.")
 
 
-if __name__ == "__main__":      
+if __name__ == "__main__":  
+    # Prueba de creación de recursos y usuarios
+    """
     biblio = Biblioteca()
     biblio.crear_usuario()
     print(biblio.usuarios)
+    biblio.crear_recurso()
+    print(biblio.recursos)
+    """    

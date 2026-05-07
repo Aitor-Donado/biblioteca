@@ -68,9 +68,6 @@ class DVD(Recurso):
         self.duracion = duracion
         self.duracion_prestamo = 5
 
-    def crear_recurso(cls):
-        pass
-
 class Revista(Recurso):
     def __init__(self, titulo, genero, numero, editorial):
         super().__init__(titulo, genero)
