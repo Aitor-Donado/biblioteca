@@ -4,7 +4,7 @@ from datetime import datetime
 import re
 
 # ==========================================
-# DECORADOR DE REGISTRO (Fase 4.3)
+# DECORADOR DE REGISTRO
 # ==========================================
 def registrar_accion(func):
     def wrapper(self, recurso, usuario):
@@ -33,18 +33,42 @@ class Biblioteca:
         else:
             raise ValueError("El email no es correcto")
 
-    def prestamo(self, recurso, usuario):
-        # Buscar el recurso
-        # Si está disponible
-        # Hacer el préstamo
-        pass
+    def prestamo(self, titulo_recurso, nombre_usuario):
+        # 1. Buscar el recurso
+        recurso = next((r for r in self.recursos if r.titulo == titulo_recurso), None)
+        # 2. Buscar el usuario
+        usuario = next((u for u in self.usuarios if u.nombre == nombre_usuario), None)
 
-    def devolucion(self, recurso, usuario):
-        # Buscar el recurso
-        # Si no está disponible devolverlo
-        # Quitar el título de los recursos prestados del usuario
-        # Poner el título en el historial del usuario
-        pass
+        if not recurso:
+            print(f"❌ Recurso '{titulo_recurso}' no encontrado.")
+            return
+        if not usuario:
+            print(f"❌ Usuario '{nombre_usuario}' no encontrado.")
+            return
+
+        try:
+            recurso.prestar(usuario)
+            print(f"✅ Préstamo realizado: {recurso.titulo} a {usuario.nombre}")
+        except PermissionError as e:
+            print(f"❌ {e}")
+
+    def devolucion(self, titulo_recurso, nombre_usuario):
+        # 1. Buscar el recurso
+        recurso = next((r for r in self.recursos if r.titulo == titulo_recurso), None)
+        usuario = next((u for u in self.usuarios if u.nombre == nombre_usuario), None)
+
+        if not recurso or not usuario:
+            print("❌ Recurso o Usuario no encontrado.")
+            return
+
+        try:
+            recurso.devolver()
+            if recurso.titulo in usuario.recursos_prestados:
+                usuario.recursos_prestados.remove(recurso.titulo)
+                usuario.historial_prestamos.append(recurso.titulo)
+            print(f"✅ Devolución realizada: {recurso.titulo} por {usuario.nombre}")
+        except PermissionError as e:
+            print(f"❌ {e}")
 
     def crear_usuario(self):
         nombre = input("Introduce el nombre del usuario: ")
@@ -89,13 +113,18 @@ class Biblioteca:
 
 
 if __name__ == "__main__":  
-    # Prueba de creación de recursos y usuarios
     biblio = Biblioteca()
     """
     biblio.crear_usuario()
     print(biblio.usuarios)
     biblio.crear_recurso()
     """
+    # Crear datos de prueba
+    u = Usuario("Pedro", "pedro@example.com")
+    biblio.usuarios.append(u)
     biblio.recursos.append(Revista("¡Hola!", "cotilleos", 300, "Bruguera"))
-    print(biblio.recursos)
+    print("Recursos antes:", biblio.recursos)
     biblio.prestamo("¡Hola!", "Pedro")
+    print("Prestados usuario:", u.recursos_prestados)
+    biblio.devolucion("¡Hola!", "Pedro")
+    print("Historial usuario:", u.historial_prestamos)

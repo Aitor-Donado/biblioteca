@@ -1,34 +1,36 @@
+from dataclasses import dataclass, field
+from typing import Optional
 import datetime
-# from functools import wraps
-
 # ==========================================
 # DECORADOR DE REGISTRO (Fase 4.3)
 # ==========================================
 def registrar_accion(func):
-    # @wraps(func)
     def wrapper(self, *args, **kwargs):
-        # 1. Ejecuta el método original (prestar o devolver)
         resultado = func(self, *args, **kwargs)
         
-        # 2. Si no se lanzó ninguna excepción, registra la acción
+        # Obtenemos el nombre del usuario si está disponible, o "Disponible"
+        nombre_usuario = self.prestado_a.nombre if self.prestado_a else "Disponible"
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open("biblioteca_log.txt", "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {func.__name__} ejecutado sobre '{self.titulo}' a {self.prestado_a.nombre if not self.disponible else ""}\n")
+            f.write(f"[{timestamp}] {func.__name__} ejecutado sobre '{self.titulo}' a {nombre_usuario}\n")
             
         return resultado
     return wrapper
 
 
 # ==========================================
-# CLASE BASE RECURSO
+# CLASE BASE RECURSO (Dataclass)
 # ==========================================
+@dataclass
 class Recurso:
-    def __init__(self, titulo, genero):
-        self.titulo = titulo
-        self.genero = genero
-        self.disponible = True
-        self.prestado_a = None
-        self.duracion_prestamo = 3
+    titulo: str
+    genero: str
+    disponible: bool = True
+    prestado_a: Optional[object] = None
+    duracion_prestamo: int = 3
+    id: int = field(init=False)
+
+    def __post_init__(self):
         self.id = id(self)
 
     @registrar_accion
@@ -37,9 +39,9 @@ class Recurso:
             self.disponible = False
             self.prestado_a = usuario
             usuario.recursos_prestados.append(self.titulo)
-            print(f"Se ha prestado el libro a {usuario.nombre}")
+            print(f"Se ha prestado {self.titulo} a {usuario.nombre}")
         else:
-            raise PermissionError("El libro no está disponible")
+            raise PermissionError("El recurso no está disponible")
 
     @registrar_accion
     def devolver(self):
@@ -47,33 +49,34 @@ class Recurso:
             self.disponible = True
             self.prestado_a = None
         else:
-            raise PermissionError("El libro ya estaba disponible")
+            raise PermissionError("El recurso ya estaba disponible")
 
     def __str__(self):
         # Se usan comillas simples externas para evitar SyntaxError con las internas
         return f'{self.titulo} ({self.genero}) - {"no " if not self.disponible else ""}disponible'
 
-
+@dataclass
 class Libro(Recurso):
-    def __init__(self, titulo, genero, autor, paginas):
-        super().__init__(titulo, genero)
-        self.autor = autor
-        self.paginas = paginas
+    autor: str = ""
+    paginas: int = 0
+    def __post_init__(self):
+        super().__post_init__()
         self.duracion_prestamo = 7
 
+@dataclass
 class DVD(Recurso):
-    def __init__(self, titulo, genero, director, duracion):
-        super().__init__(titulo, genero)
-        self.director = director
-        self.duracion = duracion
+    director: str = ""
+    duracion: int = 0
+    def __post_init__(self):
+        super().__post_init__()
         self.duracion_prestamo = 5
 
+@dataclass
 class Revista(Recurso):
-    def __init__(self, titulo, genero, numero, editorial):
-        super().__init__(titulo, genero)
-        self.numero = numero
-        self.editorial = editorial
+    numero: int = 0
+    editorial: str = ""
 
+    
 # ==========================================
 # BLOQUE DE PRUEBAS
 # ==========================================
@@ -96,7 +99,7 @@ if __name__ == "__main__":
         r.prestar("Carlos López") # → Debe rechazar la operación y avisar
     except PermissionError as e:
         print(e)
-        assert e.args == ('El libro no está disponible',), "Error no esperado"
+        assert e.args == ('El recurso no está disponible',), "Error no esperado"
     
     r.devolver()
     print(r)          # → "El Hobbit (Fantasía) - disponible"
